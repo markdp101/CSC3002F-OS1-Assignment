@@ -15,6 +15,7 @@ public class Patron extends Thread {
 
 	private int ID; //thread ID 
 	private int numberOfDrinks;
+	private long waitingTimes;
 
 
 	private DrinkOrder [] drinksOrder;
@@ -24,6 +25,8 @@ public class Patron extends Thread {
 		this.startSignal=startSignal;
 		this.theBarman=aBarman;
 		this.numberOfDrinks=5; // number of drinks is fixed
+		// Array of waiting times for each CPU burst
+		this.waitingTimes = 0;
 		drinksOrder=new DrinkOrder[numberOfDrinks];
 		if (seed>0) random = new Random(seed);// for consistent Patron behaviour
 		else random = new Random();
@@ -47,7 +50,10 @@ public class Patron extends Thread {
 	        	//drinksOrder[i]=new DrinkOrder(this.ID,i); //fixed drink order (=CPU burst), useful for testing
 				System.out.println("Order placed by " + drinksOrder[i].toString()); //output in standard format  - do not change this
 				theBarman.placeDrinkOrder(drinksOrder[i]);
+				long startWaitingTime = System.nanoTime();
 				drinksOrder[i].waitForOrder();
+				long endWaitingTime = System.nanoTime();
+				waitingTimes += endWaitingTime - startWaitingTime;
 				System.out.println("Drinking patron " + drinksOrder[i].toString());
 				sleep(drinksOrder[i].getImbibingTime()); //drinking drink = "IO"
 			}
@@ -57,6 +63,9 @@ public class Patron extends Thread {
 		} catch (InterruptedException e1) {  //do nothing
 		}
 }
+	public long getWaitingTime () {
+		return waitingTimes;
+	}
 }
 	
 

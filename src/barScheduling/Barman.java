@@ -25,7 +25,9 @@ public class Barman extends Thread {
 	Barman(  CountDownLatch startSignal,int sAlg) {
 		//which scheduling algorithm to use
 		this.schedAlg=sAlg;
-		if (schedAlg==1) this.orderQueue = new PriorityBlockingQueue<>(5000, Comparator.comparingInt(DrinkOrder::getExecutionTime)); //SJF
+		// SJF is option 1
+
+		if (schedAlg==1) this.orderQueue = new PriorityBlockingQueue<>(5000, Comparator.comparingInt(DrinkOrder::getExecutionTime));
 		else this.orderQueue = new LinkedBlockingQueue<>(); //FCFS & RR
 	    this.startSignal=startSignal;
 	}

@@ -61,13 +61,25 @@ public class SchedulingSimulation {
 		
 			
       	startSignal.countDown(); //main method ready
+		long averageWaitingTimes = 0;
       	
       	//wait till all patrons done, otherwise race condition on the file closing!
-      	for (int i=0;i<noPatrons;i++)  patrons[i].join();
+      	for (int i=0;i<noPatrons;i++) {  
+			patrons[i].join();
+			averageWaitingTimes += patrons[i].getWaitingTime();
+			System.out.println("Waiting time for patron " + i + " is " + patrons[i].getWaitingTime());
+		}
+
+		averageWaitingTimes = averageWaitingTimes / noPatrons;
+
+		// Convert to milliseconds
+
+		double averageWaitingTimesConverted = averageWaitingTimes / 1e6;
 
     	System.out.println("------Waiting for Barman------");
     	Sarah.interrupt();   //tell Barman to close up
     	Sarah.join(); //wait till she has
+		System.out.println("Average waiting time is: " + averageWaitingTimesConverted);
       	System.out.println("------Bar closed------");
  	}
 }
