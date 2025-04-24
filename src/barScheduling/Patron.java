@@ -57,33 +57,50 @@ public class Patron extends Thread {
 			System.out.println("+new thirsty Patron "+ this.ID +" arrived"); //Patron has actually arrived
 			//End do not change
 
-			long startTurnaroundTime = System.currentTimeMillis();
+			long startTurnaroundTime = 0;
 			
 	        for(int i=0;i<numberOfDrinks;i++) {
 	        	drinksOrder[i]=new DrinkOrder(this.ID); //order a drink (=CPU burst)	        
 	        	//drinksOrder[i]=new DrinkOrder(this.ID,i); //fixed drink order (=CPU burst), useful for testing
 				System.out.println("Order placed by " + drinksOrder[i].toString()); //output in standard format  - do not change this
 				theBarman.placeDrinkOrder(drinksOrder[i]);
+
+				// Recording the starting time for calculating turnaround time and response time 
+				// (start timing from when first drink order is placed).
+				if (i == 0) {
+					startTurnaroundTime = System.currentTimeMillis();
+				}
+
+				// Starting timer for calculating waiting time per job.
 				long startWaitingTime = System.currentTimeMillis();
 				drinksOrder[i].waitForOrder();
+
+				// Record time when order was received.
 				long endWaitingTime = System.currentTimeMillis();
-				waitingTimes[i] += endWaitingTime - startWaitingTime;
-				averageWaitingTime += (endWaitingTime - startWaitingTime)/numberOfDrinks;
+
+				// Compute waiting time and add it to the waiting times array which stores waiting times for each drink.
+				this.waitingTimes[i] = endWaitingTime - startWaitingTime;
+
+				// Compute average waiting time.
+				this.averageWaitingTime += (endWaitingTime - startWaitingTime)/numberOfDrinks;
+
+				// Compute the response time (time from when first order is placed till received).
 				if (i == 0) {
-					responseTime = endWaitingTime - startWaitingTime;
+					this.responseTime = endWaitingTime - startWaitingTime;
 				}
+
 				System.out.println("Drinking patron " + drinksOrder[i].toString());
 				sleep(drinksOrder[i].getImbibingTime()); //drinking drink = "IO"
 			}
 
+			// Record the time after last drink is made and drank.
 			long endTurnaroundTime = System.currentTimeMillis();
 
-			turnaroundTime = endTurnaroundTime - startTurnaroundTime;
+			// Compute and record turnaround time.
+			this.turnaroundTime = endTurnaroundTime - startTurnaroundTime;
 
 			System.out.println("Patron "+ this.ID + " completed ");
 
-
-			
 		} catch (InterruptedException e1) {  //do nothing
 		}
 }

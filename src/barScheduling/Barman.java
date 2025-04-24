@@ -20,6 +20,8 @@ public class Barman extends Thread {
 	int schedAlg =0;
 	int q=10000; //really big if not set, so FCFS
 	private int switchTime;
+	private long processingTime = 0;
+	private long totalTime = 0;
 	
 	
 	Barman(  CountDownLatch startSignal,int sAlg) {
