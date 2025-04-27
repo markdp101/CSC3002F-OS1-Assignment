@@ -18,8 +18,6 @@ public class SchedulingSimulation {
 	static Patron[] patrons; // array for customer threads
 	static Barman Sarah;
 
-	
-
 	public static void main(String[] args) throws InterruptedException, IOException {
 
 		//deal with command line arguments if provided
@@ -71,5 +69,57 @@ public class SchedulingSimulation {
     	Sarah.interrupt();   //tell Barman to close up
     	Sarah.join(); //wait till she has
       	System.out.println("------Bar closed------");
+
+		// Start outputting raw data.
+
+		// Length of barman execution (used for later processesing).
+		System.out.println(Long.toString(Sarah.getOperationLength()));
+
+		// Number of patrons.
+		System.out.println(Integer.toString(noPatrons));
+
+		// Outputting patron turnaround times in order of patron ID's (in order of arrival) seperating by ' ' (spaces).
+		for (int i = 0; i < noPatrons; ++i) {
+			System.out.print(Long.toString(patrons[i].getTurnaroundTime()) + " ");
+		}
+
+		System.out.println();
+
+		// Outputting response time of PATRON (not drink orders which I use for later calculation).
+		for (int i = 0; i < noPatrons; ++i) {
+			System.out.print(Long.toString(patrons[i].getResponseTime()) + " ");
+		}
+
+		System.out.println();
+
+		// Outputting response times per drink (not a performance metric, used for later calculations) in order of patrons in order of orders placed.
+		for (int i = 0; i < noPatrons; ++i) {
+			Long[] responseTimes = patrons[i].getResponseTimes();
+
+			for (int j = 0; j < 5; ++j) {
+				System.out.print(Long.toString(responseTimes[j]) + " ");
+			}
+
+			System.out.println();
+		}
+
+		// Outputting execution times for patron drink orders in order which they are received. Do this for each patron in order of their arrival (ID).
+		Long[][] executionTimes = Sarah.getExecutionTimes();
+
+		for (int i = 0; i < noPatrons; ++i) {
+			for (int j = 0; j < 5; ++j) {
+				System.out.print(Long.toString(executionTimes[i][j]) + " ");
+			}
+
+			System.out.println();
+		}
+
+		// Output patron completion times (time relative to start time of bar) in patron arrival order for later processing.
+		Long[] patronCompletionTimes = Sarah.getPatronCompletionTimes();
+
+		for (int i = 0; i < noPatrons; ++i) {
+			System.out.print(Long.toString(patronCompletionTimes[i]) + " ");
+		}
+
  	}
 }

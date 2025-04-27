@@ -52,8 +52,16 @@ public class Barman extends Thread {
 		this.schedAlg=sAlg;
 		// SJF is option 1
 
+		this.numPatrons = numPatrons;
+
 		// Initialize 2D array where each row is a patron with the columns holding the execution times.
 		executionTimes = new Long[numPatrons][numDrinks];
+
+		for (int i = 0; i < numPatrons; ++i) {
+			for (int j = 0; j < 5; ++j) {
+				executionTimes[i][j] = 0L;
+			}
+		}
 
 		// Initialize the counter array for orders completed for patrons.
 		completedOrders = new int[numPatrons];
@@ -124,7 +132,7 @@ public class Barman extends Thread {
 					// Assuming (built-in logic of simulator) fixed drinks per patron.
 					// Record the time all patron's orders/CPU bursts are completed relative to the start time (making zero-relative).
 					if (completedOrders[patronID] == 5) {
-						patronCompletionTimes[patronID] = startTotalTime - endExecutionTime;
+						patronCompletionTimes[patronID] = endExecutionTime - startTotalTime;
 					}
 
 					sleep(switchTime);//cost for switching orders
@@ -170,7 +178,7 @@ public class Barman extends Thread {
 						// Assuming (built-in logic of simulator) fixed drinks per patron.
 						// Record the time all patron's orders/CPU bursts are completed relative to the start time (making zero-relative).
 						if (completedOrders[patronID] == 5) {
-							patronCompletionTimes[patronID] = startTotalTime - endExecutionTime;
+							patronCompletionTimes[patronID] = endExecutionTime - startTotalTime;
 						}
 
 					}
@@ -192,7 +200,7 @@ public class Barman extends Thread {
 							// Assuming (built-in logic of simulator) fixed drinks per patron.
 							// Record the time all patron's orders/CPU bursts are completed relative to the start time (making zero-relative).
 							if (completedOrders[patronID] == 5) {
-							patronCompletionTimes[patronID] = startTotalTime - endExecutionTime;
+							patronCompletionTimes[patronID] = endExecutionTime - startTotalTime;
 							}
 						}
 
@@ -215,7 +223,7 @@ public class Barman extends Thread {
 
 	// Returns the total length that the barman was processing orders (total execution time of CPU).
 	public long getOperationLength() {
-		return startTotalTime - endTotalTime;
+		return endTotalTime - startTotalTime;
 	}
 
 	// Return the execution times of drink orders for particular patron.
