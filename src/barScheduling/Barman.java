@@ -1,4 +1,7 @@
 //M. M. Kuttel 2025 mkuttel@gmail.com
+
+// Modified by Mark Du Preez (DPRMAR021) to record performance metrics for simulation.
+// April 2025
 package barScheduling;
 
 import java.util.Random;
