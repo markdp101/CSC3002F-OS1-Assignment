@@ -33,6 +33,15 @@ public class Barman extends Thread {
 	// Keep track of completed drinks per patron where each index represents a patron and holds the count of completed drinks.
 	private int[] completedOrders;
 
+	// Used to keep track of the start time of the program.
+	private long startTotalTime;
+
+	// Used to keep track of the end time of the program.
+	private long endTotalTime;
+
+	// Used to keep track of patron completion times.
+	private Long[] patronCompletionTimes;
+
 	// private long processingTime = 0;
 	// private long totalTime = 0;
 	
@@ -51,6 +60,13 @@ public class Barman extends Thread {
 		for (int i = 0; i < numPatrons; ++i) {
 			completedOrders[i] = 0;
 		}
+
+		// Initialize barman start and end times.
+		startTotalTime = 0;
+		endTotalTime = 0;
+
+		// Initialize array of patron/processes completed order time.
+		patronCompletionTimes = new Long [numPatrons];
 
 		if (schedAlg==1) this.orderQueue = new PriorityBlockingQueue<>(5000, Comparator.comparingInt(DrinkOrder::getExecutionTime));
 		else this.orderQueue = new LinkedBlockingQueue<>(); //FCFS & RR
@@ -74,6 +90,8 @@ public class Barman extends Thread {
 			
 			startSignal.countDown(); //barman ready
 			startSignal.await(); //check latch - don't start until told to do so
+
+			startTotalTime = System.currentTimeMillis();
 
 			if ((schedAlg==0)||(schedAlg==1)) { //FCFS and non-preemptive SJF
 				while(true) {
@@ -102,6 +120,12 @@ public class Barman extends Thread {
 					// Store execution time for nth drink order for particular patron.
 					executionTimes[patronID][completedOrders[patronID]] = endExecutionTime - startExecutionTime;
 					++completedOrders[patronID];
+
+					// Assuming (built-in logic of simulator) fixed drinks per patron.
+					// Record the time all patron's orders/CPU bursts are completed relative to the start time (making zero-relative).
+					if (completedOrders[patronID] == 5) {
+						patronCompletionTimes[patronID] = startTotalTime - endExecutionTime;
+					}
 
 					sleep(switchTime);//cost for switching orders
 				}
@@ -143,6 +167,12 @@ public class Barman extends Thread {
 						executionTimes[patronID][completedOrders[patronID]] = endExecutionTime - startExecutionTime;
 						++completedOrders[patronID];
 
+						// Assuming (built-in logic of simulator) fixed drinks per patron.
+						// Record the time all patron's orders/CPU bursts are completed relative to the start time (making zero-relative).
+						if (completedOrders[patronID] == 5) {
+							patronCompletionTimes[patronID] = startTotalTime - endExecutionTime;
+						}
+
 					}
 					else {
 						sleep(q);
@@ -158,6 +188,12 @@ public class Barman extends Thread {
 						// If particular order is done move onto the next order for that particular patron.
 						if (timeLeft == 0) {
 							++completedOrders[patronID];
+
+							// Assuming (built-in logic of simulator) fixed drinks per patron.
+							// Record the time all patron's orders/CPU bursts are completed relative to the start time (making zero-relative).
+							if (completedOrders[patronID] == 5) {
+							patronCompletionTimes[patronID] = startTotalTime - endExecutionTime;
+							}
 						}
 
 						System.out.println("--INTERRUPT---preparation of drink for patron "+ currentOrder.toString()+ " time left=" + timeLeft);
@@ -170,9 +206,26 @@ public class Barman extends Thread {
 			}
 				
 		} catch (InterruptedException e1) {
+			// Record the end of the barman taking orders. Last patron's order is completed.
+			endTotalTime = System.currentTimeMillis();
 			System.out.println("---Barman is packing up ");
 			System.out.println("---number interrupts="+interrupts);
 		}
+	}
+
+	// Returns the total length that the barman was processing orders (total execution time of CPU).
+	public long getOperationLength() {
+		return startTotalTime - endTotalTime;
+	}
+
+	// Return the execution times of drink orders for particular patron.
+	public Long[][] getExecutionTimes() {
+		return executionTimes;
+	}
+
+	// Return the completion time of patrons (last drink order completed).
+	public Long[] getPatronCompletionTimes() {
+		return patronCompletionTimes;
 	}
 }
 
