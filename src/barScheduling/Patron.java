@@ -16,9 +16,6 @@ public class Patron extends Thread {
 	private int ID; //thread ID 
 	private int numberOfDrinks;
 
-	// Response time for process/patron (time from arrival under first drink is received).
-	private long responseTime;
-
 	// Turnaround time for a process/patron (time from placing first drink order to when the 5 drinks are done being made).
 	private long turnaroundTime;
 
@@ -32,9 +29,8 @@ public class Patron extends Thread {
 		this.startSignal=startSignal;
 		this.theBarman=aBarman;
 		this.numberOfDrinks=5; // number of drinks is fixed
-		// Array of waiting times for each CPU burst
+		// Array of response times for each CPU burst
 		this.responseTimes = new Long [numberOfDrinks];
-		this.responseTime = 0;
 		this.turnaroundTime = 0;
 		drinksOrder=new DrinkOrder[numberOfDrinks];
 		if (seed>0) random = new Random(seed);// for consistent Patron behaviour

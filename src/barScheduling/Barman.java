@@ -20,22 +20,45 @@ public class Barman extends Thread {
 	int schedAlg =0;
 	int q=10000; //really big if not set, so FCFS
 	private int switchTime;
-	private long processingTime = 0;
-	private long totalTime = 0;
+
+	// Used to keep track of the number of patrons/processes.
+	private int numPatrons;
+
+	private int numDrinks = 5;
+
+	// Used to keep track of execution times for the drink orders per processes.
+	// Number of drinks per patron is fixed.
+	private Long[][] executionTimes;
+
+	// Keep track of completed drinks per patron where each index represents a patron and holds the count of completed drinks.
+	private int[] completedOrders;
+
+	// private long processingTime = 0;
+	// private long totalTime = 0;
 	
 	
-	Barman(  CountDownLatch startSignal,int sAlg) {
+	// Modified constructor to get number of total patrons for recording purposes.
+	Barman(  CountDownLatch startSignal,int sAlg,int numPatrons) {
 		//which scheduling algorithm to use
 		this.schedAlg=sAlg;
 		// SJF is option 1
+
+		// Initialize 2D array where each row is a patron with the columns holding the execution times.
+		executionTimes = new Long[numPatrons][numDrinks];
+
+		// Initialize the counter array for orders completed for patrons.
+		completedOrders = new int[numPatrons];
+		for (int i = 0; i < numPatrons; ++i) {
+			completedOrders[i] = 0;
+		}
 
 		if (schedAlg==1) this.orderQueue = new PriorityBlockingQueue<>(5000, Comparator.comparingInt(DrinkOrder::getExecutionTime));
 		else this.orderQueue = new LinkedBlockingQueue<>(); //FCFS & RR
 	    this.startSignal=startSignal;
 	}
 	
-	Barman(  CountDownLatch startSignal,int sAlg,int quantum, int sTime) { //overloading constructor for RR which needs q
-		this(startSignal, sAlg);
+	Barman(  CountDownLatch startSignal,int sAlg,int numPatrons,int quantum, int sTime) { //overloading constructor for RR which needs q
+		this(startSignal, sAlg, numPatrons);
 		q=quantum;
 		switchTime=sTime;
 	}
@@ -55,10 +78,31 @@ public class Barman extends Thread {
 			if ((schedAlg==0)||(schedAlg==1)) { //FCFS and non-preemptive SJF
 				while(true) {
 					currentOrder=orderQueue.take();
+
+					// Start recording the execution time --> drink is starting to be made.
+					long startExecutionTime = System.currentTimeMillis();
+
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString());
 					sleep(currentOrder.getExecutionTime()); //processing order (="CPU burst")
+
+					// Finish recording the execution time --> drink is completed.
+					long endExecutionTime = System.currentTimeMillis();
+
 					System.out.println("---Barman has made drink for patron "+ currentOrder.toString());
 					currentOrder.orderDone();
+
+					// Do the computation after order is done to minimally effect recorded waiting and response times for patrons.
+
+					// Getting the patrons id for particular drink order.
+					String string = currentOrder.toString();
+
+					// Extract and cast to integer the patron ID.
+					int patronID = Integer.parseInt(string.substring(0, string.indexOf(":")));
+
+					// Store execution time for nth drink order for particular patron.
+					executionTimes[patronID][completedOrders[patronID]] = endExecutionTime - startExecutionTime;
+					++completedOrders[patronID];
+
 					sleep(switchTime);//cost for switching orders
 				}
 			}
@@ -67,20 +111,55 @@ public class Barman extends Thread {
 				int timeLeft=0;
 				System.out.println("---Barman started with q= "+q);
 
+				// The following recording of execution times for drinks works on the logic fixed into the program that a patron orders and receives one drink at a time.
+
 				while(true) {
 					System.out.println("---Barman waiting for next order ");
 					currentOrder=orderQueue.take();
+
+					// Getting the patrons id for particular drink order.
+					String string = currentOrder.toString();
+
+					// Extract and cast to integer the patron ID.
+					int patronID = Integer.parseInt(string.substring(0, string.indexOf(":")));
+
+					// Start recording the execution time --> drink is starting to be made.
+					long startExecutionTime = System.currentTimeMillis();
 
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString() );
 					burst=currentOrder.getExecutionTime();
 					if(burst<=q) { //within the quantum
 						sleep(burst); //processing complete order ="CPU burst"
 						System.out.println("---Barman has made drink for patron "+ currentOrder.toString());
+
+						// Finish recording the execution time --> drink is completed.
+						long endExecutionTime = System.currentTimeMillis();
+
 						currentOrder.orderDone();
+
+						// Do the computation after order is done to minimally effect recorded waiting and response times for patrons.
+
+						// Store execution time for nth drink order for particular patron.
+						executionTimes[patronID][completedOrders[patronID]] = endExecutionTime - startExecutionTime;
+						++completedOrders[patronID];
+
 					}
 					else {
 						sleep(q);
+
+						// Finish recording the execution time --> drink is completed.
+						long endExecutionTime = System.currentTimeMillis();
+
 						timeLeft=burst-q;
+
+						// Increment execution time for nth drink order for particular patron.
+						executionTimes[patronID][completedOrders[patronID]] += endExecutionTime - startExecutionTime;
+
+						// If particular order is done move onto the next order for that particular patron.
+						if (timeLeft == 0) {
+							++completedOrders[patronID];
+						}
+
 						System.out.println("--INTERRUPT---preparation of drink for patron "+ currentOrder.toString()+ " time left=" + timeLeft);
 						interrupts++;
 						currentOrder.setRemainingPreparationTime(timeLeft);

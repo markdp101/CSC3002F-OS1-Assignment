@@ -33,7 +33,7 @@ public class SchedulingSimulation {
 		startSignal= new CountDownLatch(noPatrons+2);//Barman and patrons and main method must be ready
 		
 		//create barman
-        Sarah= new Barman(startSignal,sched,q,s); 
+        Sarah= new Barman(startSignal,sched,noPatrons,q,s); 
      	Sarah.start();
   
 	    //create all the patrons, who all need access to Barman
