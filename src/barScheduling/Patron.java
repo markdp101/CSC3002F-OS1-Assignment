@@ -16,16 +16,14 @@ public class Patron extends Thread {
 	private int ID; //thread ID 
 	private int numberOfDrinks;
 
-	// Cumulative waiting time for process/patron.
-	private long averageWaitingTime;
-
-	// Response time for process/patron.
+	// Response time for process/patron (time from arrival under first drink is received).
 	private long responseTime;
 
-	// Array of longs representing waiting times for a particular drink/job.
-	private Long[] waitingTimes;
-
+	// Turnaround time for a process/patron (time from placing first drink order to when the 5 drinks are done being made).
 	private long turnaroundTime;
+
+	// Records the response time for each drink (time from when order was placed to when drink was received).
+	private Long[] responseTimes;
 
 	private DrinkOrder [] drinksOrder;
 	
@@ -35,8 +33,7 @@ public class Patron extends Thread {
 		this.theBarman=aBarman;
 		this.numberOfDrinks=5; // number of drinks is fixed
 		// Array of waiting times for each CPU burst
-		this.averageWaitingTime = 0;
-		this.waitingTimes = new Long [numberOfDrinks];
+		this.responseTimes = new Long [numberOfDrinks];
 		this.responseTime = 0;
 		this.turnaroundTime = 0;
 		drinksOrder=new DrinkOrder[numberOfDrinks];
@@ -58,6 +55,7 @@ public class Patron extends Thread {
 			//End do not change
 
 			long startTurnaroundTime = 0;
+			long endTurnaroundTime = 0;
 			
 	        for(int i=0;i<numberOfDrinks;i++) {
 	        	drinksOrder[i]=new DrinkOrder(this.ID); //order a drink (=CPU burst)	        
@@ -72,29 +70,24 @@ public class Patron extends Thread {
 				}
 
 				// Starting timer for calculating waiting time per job.
-				long startWaitingTime = System.currentTimeMillis();
+				long startResponseTime = System.currentTimeMillis();
 				drinksOrder[i].waitForOrder();
 
 				// Record time when order was received.
-				long endWaitingTime = System.currentTimeMillis();
+				long endResponseTime = System.currentTimeMillis();
 
-				// Compute waiting time and add it to the waiting times array which stores waiting times for each drink.
-				this.waitingTimes[i] = endWaitingTime - startWaitingTime;
+				// Compute response time and add it to the response times array which stores response times for each drink.
+				// Response time for particular drink = Time from when order for particular drink was submitted till drink is received.
+				this.responseTimes[i] = endResponseTime - startResponseTime;
 
-				// Compute average waiting time.
-				this.averageWaitingTime += (endWaitingTime - startWaitingTime)/numberOfDrinks;
-
-				// Compute the response time (time from when first order is placed till received).
-				if (i == 0) {
-					this.responseTime = endWaitingTime - startWaitingTime;
+				// Record the time at which the last drink is done being made.
+				if (i == (numberOfDrinks - 1)) {
+					endTurnaroundTime = endResponseTime;
 				}
 
 				System.out.println("Drinking patron " + drinksOrder[i].toString());
 				sleep(drinksOrder[i].getImbibingTime()); //drinking drink = "IO"
 			}
-
-			// Record the time after last drink is made and drank.
-			long endTurnaroundTime = System.currentTimeMillis();
 
 			// Compute and record turnaround time.
 			this.turnaroundTime = endTurnaroundTime - startTurnaroundTime;
@@ -106,18 +99,13 @@ public class Patron extends Thread {
 }
 
 // Return reference to array of waiting times for particular patron.
-public Long[] getWaitingTimes () {
-	return waitingTimes;
+public Long[] getResponseTimes () {
+	return responseTimes;
 }
 
-// Return average waiting time for a particular patron.
-public long getAverageWaitingTime() {
-	return averageWaitingTime;
-}
-
-// Return the response time for a particular patron.
+// Return the response time for process (response time of first drink).
 public long getResponseTime () {
-	return responseTime;
+	return responseTimes[0];
 }
 
 // Return the turnaround time for a particular patron.
