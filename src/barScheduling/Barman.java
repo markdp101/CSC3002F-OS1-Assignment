@@ -102,20 +102,20 @@ public class Barman extends Thread {
 			startSignal.countDown(); //barman ready
 			startSignal.await(); //check latch - don't start until told to do so
 
-			startTotalTime = System.currentTimeMillis();
+			startTotalTime = System.nanoTime();
 
 			if ((schedAlg==0)||(schedAlg==1)) { //FCFS and non-preemptive SJF
 				while(true) {
 					currentOrder=orderQueue.take();
 
 					// Start recording the execution time --> drink is starting to be made.
-					long startExecutionTime = System.currentTimeMillis();
+					long startExecutionTime = System.nanoTime();
 
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString());
 					sleep(currentOrder.getExecutionTime()); //processing order (="CPU burst")
 
 					// Finish recording the execution time --> drink is completed.
-					long endExecutionTime = System.currentTimeMillis();
+					long endExecutionTime = System.nanoTime();
 
 					System.out.println("---Barman has made drink for patron "+ currentOrder.toString());
 					currentOrder.orderDone();
@@ -162,10 +162,10 @@ public class Barman extends Thread {
 					burst=currentOrder.getExecutionTime();
 					if(burst<=q) { //within the quantum
 						// Start recording the execution time --> drink is starting to be made.
-						long startExecutionTime = System.currentTimeMillis();
+						long startExecutionTime = System.nanoTime();
 						sleep(burst); //processing complete order ="CPU burst"
 						// Finish recording the execution time --> drink is completed.
-						long endExecutionTime = System.currentTimeMillis();
+						long endExecutionTime = System.nanoTime();
 						System.out.println("---Barman has made drink for patron "+ currentOrder.toString());
 
 						currentOrder.orderDone();
@@ -185,12 +185,12 @@ public class Barman extends Thread {
 					}
 					else {
 						// Start recording the execution time --> drink is starting to be made.
-						long startExecutionTime = System.currentTimeMillis();
+						long startExecutionTime = System.nanoTime();
 
 						sleep(q);
 
 						// Finish recording the execution time --> drink is completed.
-						long endExecutionTime = System.currentTimeMillis();
+						long endExecutionTime = System.nanoTime();
 
 						timeLeft=burst-q;
 
@@ -219,7 +219,7 @@ public class Barman extends Thread {
 				
 		} catch (InterruptedException e1) {
 			// Record the end of the barman taking orders. Last patron's order is completed.
-			endTotalTime = System.currentTimeMillis();
+			endTotalTime = System.nanoTime();
 			System.out.println("---Barman is packing up ");
 			System.out.println("---number interrupts="+interrupts);
 		}
