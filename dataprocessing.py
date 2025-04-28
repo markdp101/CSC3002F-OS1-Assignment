@@ -5,47 +5,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import sys
 
 def main ():
-    patrons, fcfsCPUUtilisation, fcfsThroughput, fcfsTurnaroundTimes, fcfsWaitingTimes, fcfsResponseTimes = extractRawData("scheduler_0_raw_data_0.txt")
-    patrons, sjfCPUUtilisation, sjfThroughput, sjfTurnaroundTimes, sjfWaitingTimes, sjfResponseTimes = extractRawData("scheduler_1_raw_data_0.txt")
-    patrons, rrCPUUtilisation, rrThroughput, rrTurnaroundTimes, rrWaitingTimes, rrResponseTimes = extractRawData("scheduler_2_raw_data_0.txt")
-
-    # 3 runs (repetitions of the experiment).
-    for i in range(1, 3):
-        patronsi, fcfsCPUUtilisationi, fcfsThroughputi, fcfsTurnaroundTimesi, fcfsWaitingTimesi, fcfsResponseTimesi = extractRawData("scheduler_0_raw_data_" + str(i) + ".txt")
-        patronsi, sjfCPUUtilisationi, sjfThroughputi, sjfTurnaroundTimesi, sjfWaitingTimesi, sjfResponseTimesi = extractRawData("scheduler_1_raw_data_" + str(i) + ".txt")
-        patronsi, rrCPUUtilisationi, rrThroughputi, rrTurnaroundTimesi, rrWaitingTimesi, rrResponseTimesi = extractRawData("scheduler_2_raw_data_" + str(i) + ".txt")
-
-        # Average CPU utilisation.
-        fcfsCPUUtilisation = (fcfsCPUUtilisation + fcfsCPUUtilisationi)/2
-        sjfCPUUtilisation = (sjfCPUUtilisation + sjfCPUUtilisationi)/2
-        rrCPUUtilisation = (rrCPUUtilisation + rrCPUUtilisationi)/2
-
-        # Average Throughput.
-        fcfsThroughput = (fcfsThroughput + fcfsThroughputi)/2
-        sjfThroughput = (sjfThroughput + sjfThroughputi)/2
-        rrThroughput = (rrThroughput + rrThroughputi)/2
-
-        # Average Turnaround time.
-        fcfsTurnaroundTimes = (fcfsTurnaroundTimes + fcfsTurnaroundTimesi)/2
-        sjfTurnaroundTimes = (sjfTurnaroundTimes + sjfTurnaroundTimesi)/2
-        rrTurnaroundTimes = (rrTurnaroundTimes + rrTurnaroundTimesi)/2
-
-        # Average Waiting time.
-        fcfsWaitingTimes = (fcfsWaitingTimes + fcfsWaitingTimesi)/2
-        sjfWaitingTimes = (sjfWaitingTimes + sjfWaitingTimesi)/2
-        rrWaitingTimes = (rrWaitingTimes + rrWaitingTimesi)/2
-
-        # Average Response time.
-        fcfsResponseTimes = (fcfsResponseTimes + fcfsResponseTimesi)/2
-        sjfResponseTimes = (sjfResponseTimes + sjfResponseTimesi)/2
-        rrResponseTimes = (rrResponseTimes + rrResponseTimesi)/2
-
-    plotThroughput(fcfsThroughput, sjfThroughput, rrThroughput)
-    plotTurnaroundTime(patrons, fcfsTurnaroundTimes, sjfTurnaroundTimes, rrTurnaroundTimes)
-    plotWaitingTime(patrons, fcfsWaitingTimes, sjfWaitingTimes, rrWaitingTimes)
-    plotResponseTime()
+    if (sys.argv.len() == 2):
+        runMainExperiment(int(sys.argv[1]))
+    else:
+        runTimeQuantumExperiment(int(sys.argv[1]))
+    # runTimeQuantumExperiment()
 
 def extractRawData(fileName):
     # Open simulation raw data file and extract data.
@@ -106,6 +73,7 @@ def extractRawData(fileName):
         patronCompletionTimes = np.array(list(map(int, rawData.readline().split())))
 
         # Calculating throughput using sliding window.
+        # Average Burst Time = 
         # Size of sliding window.
         windowSize = 3000
 
@@ -146,7 +114,7 @@ def plotThroughput(fcfsThroughput, sjfThroughput, rrThroughput):
     plt.xlabel('Time (seconds)')
     plt.ylabel('Throughput (Processes completed per second)')
 
-    plt.title('Throughput for different CPU scheduling algorithms.')
+    plt.title('Throughput for different CPU scheduling algorithms')
 
     plt.legend()
 
@@ -162,7 +130,7 @@ def plotTurnaroundTime(patrons, fcfsTurnaroundTimes, sjfTurnaroundTimes, rrTurna
     plt.xlabel('Processes')
     plt.ylabel('Turnaround Time (seconds)')
 
-    plt.title('Turnaround times of processes for different scheduling algorithms.')
+    plt.title('Turnaround times of processes for different scheduling algorithms')
 
     plt.legend()
 
@@ -178,7 +146,7 @@ def plotWaitingTime(patrons, fcfsWaitingTimes, sjfWaitingTimes, rrWaitingTimes):
     plt.xlabel('Processes')
     plt.ylabel('Waiting Time (seconds)')
 
-    plt.title('Waiting times of processes for different scheduling algorithms.')
+    plt.title('Waiting times of processes for different scheduling algorithms')
 
     plt.legend()
 
@@ -194,7 +162,7 @@ def plotResponseTime(patrons, fcfsResponseTimes, sjfResponseTimes, rrResponseTim
     plt.xlabel('Processes')
     plt.ylabel('Response Time (seconds)')
 
-    plt.title('Response times of processes for different scheduling algorithms.')
+    plt.title('Response times of processes for different scheduling algorithms')
 
     plt.legend()
 
@@ -202,13 +170,151 @@ def plotResponseTime(patrons, fcfsResponseTimes, sjfResponseTimes, rrResponseTim
 
     plt.clf()
 
-def getTimeSeries(throughputs):
+def plotCPUUtilisation(fcfsCPUUtilisation, sjfCPUUtilisation, rrCPUUtilisation):
+    x = ['First-Come First-Serve','Shortest-Job First','Round-Robin']
+    heights = [fcfsCPUUtilisation, sjfCPUUtilisation, rrCPUUtilisation]
+
+    plt.bar(x, heights)
+
+    plt.xlabel('Scheduling Algorithm')
+    plt.ylabel('CPU Utilisation')
+
+    plt.title('CPU Utilisation for different scheduling algorithms')
+
+    # plt.legend()
+
+    plt.savefig('CPUUtilisationPlot.jpeg', dpi=300)
+
+    plt.clf()
+
+def getCMASeries(throughputs):
     # Performing CMA on throughput time series to smooth it with window size 3000.
     # timeSeriesThroughput = pd.Series(throughputs)
 
-    cmaThroughput = timeSeriesThroughput.rolling(window=3000, center=True).mean()
+    cmaThroughput = throughputs.rolling(window=1000, center=True).mean()
 
     return cmaThroughput
+
+def runMainExperiment(numRepetitions):
+    patrons, fcfsCPUUtilisation, fcfsThroughput, fcfsTurnaroundTimes, fcfsWaitingTimes, fcfsResponseTimes = extractRawData("scheduler_0_raw_data_0.txt")
+    patrons, sjfCPUUtilisation, sjfThroughput, sjfTurnaroundTimes, sjfWaitingTimes, sjfResponseTimes = extractRawData("scheduler_1_raw_data_0.txt")
+    patrons, rrCPUUtilisation, rrThroughput, rrTurnaroundTimes, rrWaitingTimes, rrResponseTimes = extractRawData("scheduler_2_raw_data_0.txt")
+
+    # 3 runs (repetitions of the experiment).
+    for i in range(1, numRepetitions):
+        patronsi, fcfsCPUUtilisationi, fcfsThroughputi, fcfsTurnaroundTimesi, fcfsWaitingTimesi, fcfsResponseTimesi = extractRawData("scheduler_0_raw_data_" + str(i) + ".txt")
+        patronsi, sjfCPUUtilisationi, sjfThroughputi, sjfTurnaroundTimesi, sjfWaitingTimesi, sjfResponseTimesi = extractRawData("scheduler_1_raw_data_" + str(i) + ".txt")
+        patronsi, rrCPUUtilisationi, rrThroughputi, rrTurnaroundTimesi, rrWaitingTimesi, rrResponseTimesi = extractRawData("scheduler_2_raw_data_" + str(i) + ".txt")
+
+        # Average CPU utilisation.
+        fcfsCPUUtilisation = (fcfsCPUUtilisation + fcfsCPUUtilisationi)/2
+        sjfCPUUtilisation = (sjfCPUUtilisation + sjfCPUUtilisationi)/2
+        rrCPUUtilisation = (rrCPUUtilisation + rrCPUUtilisationi)/2
+
+        # Average Throughput.
+        fcfsThroughput = (fcfsThroughput + fcfsThroughputi)/2
+        sjfThroughput = (sjfThroughput + sjfThroughputi)/2
+        rrThroughput = (rrThroughput + rrThroughputi)/2
+
+        # Average Turnaround time.
+        fcfsTurnaroundTimes = (fcfsTurnaroundTimes + fcfsTurnaroundTimesi)/2
+        sjfTurnaroundTimes = (sjfTurnaroundTimes + sjfTurnaroundTimesi)/2
+        rrTurnaroundTimes = (rrTurnaroundTimes + rrTurnaroundTimesi)/2
+
+        # Average Waiting time.
+        fcfsWaitingTimes = (fcfsWaitingTimes + fcfsWaitingTimesi)/2
+        sjfWaitingTimes = (sjfWaitingTimes + sjfWaitingTimesi)/2
+        rrWaitingTimes = (rrWaitingTimes + rrWaitingTimesi)/2
+
+        # Average Response time.
+        fcfsResponseTimes = (fcfsResponseTimes + fcfsResponseTimesi)/2
+        sjfResponseTimes = (sjfResponseTimes + sjfResponseTimesi)/2
+        rrResponseTimes = (rrResponseTimes + rrResponseTimesi)/2
+
+    # plotThroughput(getCMASeries(fcfsThroughput), getCMASeries(sjfThroughput), getCMASeries(rrThroughput))
+    plotThroughput(fcfsThroughput, sjfThroughput, rrThroughput)
+    plotTurnaroundTime(patrons, fcfsTurnaroundTimes, sjfTurnaroundTimes, rrTurnaroundTimes)
+    plotWaitingTime(patrons, fcfsWaitingTimes, sjfWaitingTimes, rrWaitingTimes)
+    plotResponseTime(patrons, fcfsResponseTimes, sjfResponseTimes, rrResponseTimes)
+    plotCPUUtilisation(fcfsCPUUtilisation, sjfCPUUtilisation, rrCPUUtilisation)
+
+def runTimeQuantumExperiment(numRepetitions):
+    quanta = np.arange(5, 151, 5)
+    averageTurnaroundTime = []
+    averageResponseTime = []
+
+    for i in quanta:
+        averageTurnaroundPerQuantum = []
+        averageResponsePerQuantum = []
+
+        for j in range(numRepetitions):
+            averageTurnaround, averageResponse = extractAverageMetricsPerQuantum(i, j)
+            averageTurnaroundPerQuantum.append(averageTurnaround)
+            averageResponsePerQuantum.append(averageResponse)
+        
+        averageTurnaroundTime.append(np.array(averageTurnaroundPerQuantum).mean())
+        averageResponseTime.append(np.array(averageResponsePerQuantum).mean())
+
+    averageTurnaroundTime = np.array(averageTurnaroundTime)
+    averageResponseTime = np.array(averageResponseTime)
+
+    plt.plot(quanta, averageTurnaroundTime)
+
+    plt.xlabel('Time Quantum')
+    plt.ylabel('Average Turnaround Time (seconds)')
+
+    plt.title('Average Turnaround times for different time quanta')
+
+    plt.legend()
+
+    plt.savefig('TurnaroundTimeQuantumPlot.jpeg', dpi=300)
+
+    plt.clf()
+
+    plt.plot(quanta, averageResponseTime)
+
+    plt.xlabel('Time Quantum')
+    plt.ylabel('Average Response Time (seconds)')
+
+    plt.title('Average Response times fir different time quanta')
+
+    plt.legend()
+
+    plt.savefig('ResponseTimeQuantumPlot.jpeg', dpi=300)
+
+    plt.clf()
+
+def extractAverageMetricsPerQuantum(quantum, index):
+    # Open simulation raw data file and extract data.
+    with open("quantum_" + str(quantum) + "_raw_data_" + str(index) + ".txt", 'r') as rawData:
+        # Skip all the simulation output and get to the raw data.
+        while rawData.readline().strip() != "------Bar closed------":
+            continue
+        
+        # Extract the length of execution.
+        totalExecutionTime = int(rawData.readline().strip())
+
+        # Get number of patrons.
+        numPatrons = int(rawData.readline().strip())
+        # Initialize numpy array for patrons.
+        patrons = np.arange(numPatrons)
+
+        # Extract patron turnaround times into numpy array.
+        patronTurnaroundTimes = np.array(list(map(int, rawData.readline().split())))
+
+        # Extract patron response times into numpy array.
+        patronResponseTimes = np.array(list(map(int, rawData.readline().split())))
+
+        # Extract drink response times.
+        drinkResponseTimes = []
+
+        # Extracting response times per drink for each drink into a 2D numpy array.
+        for i in range(numPatrons):
+            drinkResponseTimes.append(list(map(int, rawData.readline().split())))
+
+        drinkResponseTimes = np.array(drinkResponseTimes)
+
+        return patronTurnaroundTimes.mean(), drinkResponseTimes.mean()
     
 if __name__ == "__main__":
     main()
