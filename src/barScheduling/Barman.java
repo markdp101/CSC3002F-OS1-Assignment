@@ -158,24 +158,22 @@ public class Barman extends Thread {
 					// Extract and cast to integer the patron ID.
 					int patronID = Integer.parseInt(string.substring(0, string.indexOf(":")));
 
-					// Start recording the execution time --> drink is starting to be made.
-					long startExecutionTime = System.currentTimeMillis();
-
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString() );
 					burst=currentOrder.getExecutionTime();
 					if(burst<=q) { //within the quantum
+						// Start recording the execution time --> drink is starting to be made.
+						long startExecutionTime = System.currentTimeMillis();
 						sleep(burst); //processing complete order ="CPU burst"
-						System.out.println("---Barman has made drink for patron "+ currentOrder.toString());
-
 						// Finish recording the execution time --> drink is completed.
 						long endExecutionTime = System.currentTimeMillis();
+						System.out.println("---Barman has made drink for patron "+ currentOrder.toString());
 
 						currentOrder.orderDone();
 
 						// Do the computation after order is done to minimally effect recorded waiting and response times for patrons.
 
 						// Store execution time for nth drink order for particular patron.
-						executionTimes[patronID][completedOrders[patronID]] = endExecutionTime - startExecutionTime;
+						executionTimes[patronID][completedOrders[patronID]] += endExecutionTime - startExecutionTime;
 						++completedOrders[patronID];
 
 						// Assuming (built-in logic of simulator) fixed drinks per patron.
@@ -186,6 +184,9 @@ public class Barman extends Thread {
 
 					}
 					else {
+						// Start recording the execution time --> drink is starting to be made.
+						long startExecutionTime = System.currentTimeMillis();
+
 						sleep(q);
 
 						// Finish recording the execution time --> drink is completed.

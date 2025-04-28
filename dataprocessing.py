@@ -8,7 +8,7 @@ import pandas as pd
 import sys
 
 def main ():
-    if (sys.argv.len() == 2):
+    if (len(sys.argv) == 2):
         runMainExperiment(int(sys.argv[1]))
     else:
         runTimeQuantumExperiment(int(sys.argv[1]))
@@ -232,7 +232,7 @@ def runMainExperiment(numRepetitions):
         rrResponseTimes = (rrResponseTimes + rrResponseTimesi)/2
 
     # plotThroughput(getCMASeries(fcfsThroughput), getCMASeries(sjfThroughput), getCMASeries(rrThroughput))
-    plotThroughput(fcfsThroughput, sjfThroughput, rrThroughput)
+    plotThroughput(getCMASeries(fcfsThroughput), getCMASeries(sjfThroughput), getCMASeries(rrThroughput))
     plotTurnaroundTime(patrons, fcfsTurnaroundTimes, sjfTurnaroundTimes, rrTurnaroundTimes)
     plotWaitingTime(patrons, fcfsWaitingTimes, sjfWaitingTimes, rrWaitingTimes)
     plotResponseTime(patrons, fcfsResponseTimes, sjfResponseTimes, rrResponseTimes)
@@ -258,27 +258,44 @@ def runTimeQuantumExperiment(numRepetitions):
     averageTurnaroundTime = np.array(averageTurnaroundTime)
     averageResponseTime = np.array(averageResponseTime)
 
+    minTurnaroundTime = np.min(averageTurnaroundTime)
+    minResponseTime = np.min(averageResponseTime)
+
+    minTurnaroundQuantum = np.argmin(averageTurnaroundTime)
+    minResponseQuantum = np.argmin(averageResponseTime)
+
+    print("Best time quantum for turnaround time: ", quanta[minTurnaroundQuantum])
+    print("Best time quantum for response time: ", quanta[minResponseQuantum])
+
+    minTimeQuantum = int((quanta[minTurnaroundQuantum] + quanta[minResponseQuantum])/2)
+
+    print("Best overall time quantum: " + str(minTimeQuantum))
+    print(str(minTimeQuantum))
+
     plt.plot(quanta, averageTurnaroundTime)
+    plt.scatter(quanta[minTurnaroundQuantum], minTurnaroundTime, color='red', s=20, zorder=5)
 
     plt.xlabel('Time Quantum')
     plt.ylabel('Average Turnaround Time (seconds)')
 
     plt.title('Average Turnaround times for different time quanta')
 
-    plt.legend()
+    # plt.legend()
 
     plt.savefig('TurnaroundTimeQuantumPlot.jpeg', dpi=300)
 
     plt.clf()
 
     plt.plot(quanta, averageResponseTime)
+    plt.scatter(quanta[minResponseQuantum], minResponseTime, color='red', s=20, zorder=5)
+
 
     plt.xlabel('Time Quantum')
     plt.ylabel('Average Response Time (seconds)')
 
-    plt.title('Average Response times fir different time quanta')
+    plt.title('Average Response times for different time quanta')
 
-    plt.legend()
+    # plt.legend()
 
     plt.savefig('ResponseTimeQuantumPlot.jpeg', dpi=300)
 
