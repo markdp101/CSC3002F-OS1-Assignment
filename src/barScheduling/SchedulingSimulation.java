@@ -76,21 +76,21 @@ public class SchedulingSimulation {
 		// Start outputting raw data.
 
 		// Length of barman execution (used for later processesing).
-		System.out.println(Long.toString(Sarah.getOperationLength()));
+		System.out.println(Long.toString((long) Math.ceil(Sarah.getOperationLength()/1000000)));
 
 		// Number of patrons.
 		System.out.println(Integer.toString(noPatrons));
 
 		// Outputting patron turnaround times in order of patron ID's (in order of arrival) seperating by ' ' (spaces).
 		for (int i = 0; i < noPatrons; ++i) {
-			System.out.print(Long.toString(patrons[i].getTurnaroundTime()) + " ");
+			System.out.print(Long.toString((long) Math.ceil(patrons[i].getTurnaroundTime()/1000000)) + " ");
 		}
 
 		System.out.println();
 
 		// Outputting response time of PATRON (not drink orders which I use for later calculation).
 		for (int i = 0; i < noPatrons; ++i) {
-			System.out.print(Long.toString(patrons[i].getResponseTime()) + " ");
+			System.out.print(Long.toString((long) Math.ceil(patrons[i].getResponseTime()/1000000)) + " ");
 		}
 
 		System.out.println();
@@ -100,7 +100,7 @@ public class SchedulingSimulation {
 			Long[] responseTimes = patrons[i].getResponseTimes();
 
 			for (int j = 0; j < 5; ++j) {
-				System.out.print(Long.toString(responseTimes[j]) + " ");
+				System.out.print(Long.toString((long) Math.ceil(responseTimes[j]/1000000)) + " ");
 			}
 
 			System.out.println();
@@ -111,7 +111,7 @@ public class SchedulingSimulation {
 
 		for (int i = 0; i < noPatrons; ++i) {
 			for (int j = 0; j < 5; ++j) {
-				System.out.print(Long.toString(executionTimes[i][j]) + " ");
+				System.out.print(Long.toString((long) Math.ceil(executionTimes[i][j]/1000000)) + " ");
 			}
 
 			System.out.println();
@@ -121,7 +121,7 @@ public class SchedulingSimulation {
 		Long[] patronCompletionTimes = Sarah.getPatronCompletionTimes();
 
 		for (int i = 0; i < noPatrons; ++i) {
-			System.out.print(Long.toString(patronCompletionTimes[i]) + " ");
+			System.out.print(Long.toString((long) Math.ceil(patronCompletionTimes[i]/1000000)) + " ");
 		}
 
  	}
