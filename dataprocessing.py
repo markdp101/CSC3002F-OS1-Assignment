@@ -113,9 +113,9 @@ def plotThroughput(fcfsThroughput, sjfThroughput, rrThroughput):
     plt.plot(rrThroughput, label='Round-Robin')
 
     plt.xlabel('Time (seconds)')
-    plt.ylabel('Throughput (Processes completed per second)')
+    plt.ylabel('Throughput (Processes/Patrons completed per second)')
 
-    plt.title('Throughput for different CPU scheduling algorithms')
+    plt.title('Throughput for different CPU scheduling algorithms', loc='center')
 
     plt.legend()
 
@@ -123,16 +123,26 @@ def plotThroughput(fcfsThroughput, sjfThroughput, rrThroughput):
 
     plt.clf()
 
-    time_index = fcfsThroughput.index  # Assumes all series share the same index
+    timeIndex = fcfsThroughput.index  # Assumes all series share the same index
 
-    plt.plot(time_index, [np.mean(fcfsThroughput)] * len(time_index), label='First-Come First-Serve')
-    plt.plot(time_index, [np.mean(sjfThroughput)] * len(time_index), label='Shortest-Job First')
-    plt.plot(time_index, [np.mean(rrThroughput)] * len(time_index), label='Round-Robin')
+    plt.plot(timeIndex, [np.mean(fcfsThroughput)] * len(timeIndex), label='First-Come First-Serve')
+    plt.plot(timeIndex, [np.mean(sjfThroughput)] * len(timeIndex), label='Shortest-Job First')
+    plt.plot(timeIndex, [np.mean(rrThroughput)] * len(timeIndex), label='Round-Robin')
+
+    fcfsMean = np.mean(fcfsThroughput)
+    xPosition = timeIndex[len(timeIndex) // 2]
+    plt.text(xPosition, fcfsMean + 0.01, str(round(fcfsMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+
+    sjfMean = np.mean(sjfThroughput)
+    plt.text(xPosition, sjfMean + 0.01, str(round(sjfMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+
+    rrMean = np.mean(rrThroughput)
+    plt.text(xPosition, rrMean + 0.01, str(round(rrMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
 
     plt.xlabel('Time (seconds)')
-    plt.ylabel('Mean Throughput (Processes completed per second)')
+    plt.ylabel('Mean Throughput (Processes/Patrons completed per second)')
 
-    plt.title('Mean Throughput for different CPU scheduling algorithms')
+    plt.title('Mean throughput for different CPU scheduling algorithms', loc='center')
 
     plt.legend()
 
@@ -148,7 +158,7 @@ def plotTurnaroundTime(patrons, fcfsTurnaroundTimes, sjfTurnaroundTimes, rrTurna
     plt.xlabel('Processes')
     plt.ylabel('Turnaround Time (seconds)')
 
-    plt.title('Turnaround times of processes for different scheduling algorithms')
+    plt.title('Turnaround time of processes/patrons for different scheduling algorithms', loc='center')
 
     plt.legend()
 
@@ -160,10 +170,20 @@ def plotTurnaroundTime(patrons, fcfsTurnaroundTimes, sjfTurnaroundTimes, rrTurna
     plt.plot(patrons, [np.mean(sjfTurnaroundTimes)]*len(patrons), label='Shortest-Job First')
     plt.plot(patrons, [np.mean(rrTurnaroundTimes)]*len(patrons), label='Round-Robin')
 
+    fcfsMean = np.mean(fcfsTurnaroundTimes)
+    xPosition = patrons[len(patrons) // 2]
+    plt.text(xPosition, fcfsMean - 90, str(round(fcfsMean, 2)), ha='center', va='top', fontsize=9, color='black')
+
+    sjfMean = np.mean(sjfTurnaroundTimes)
+    plt.text(xPosition, sjfMean + 0.02, str(round(sjfMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+
+    rrMean = np.mean(rrTurnaroundTimes)
+    plt.text(xPosition, rrMean + 0.02, str(round(rrMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+
     plt.xlabel('Processes')
     plt.ylabel('Mean Turnaround Time (seconds)')
 
-    plt.title('Mean Turnaround times of processes for different scheduling algorithms')
+    plt.title('Mean turnaround times of processes/patrons for different scheduling algorithms', loc='center')
 
     plt.legend()
 
@@ -179,7 +199,7 @@ def plotWaitingTime(patrons, fcfsWaitingTimes, sjfWaitingTimes, rrWaitingTimes):
     plt.xlabel('Processes')
     plt.ylabel('Waiting Time (seconds)')
 
-    plt.title('Waiting times of processes for different scheduling algorithms')
+    plt.title('Waiting times of processes/patrons for different scheduling algorithms', loc='center')
 
     plt.legend()
 
@@ -191,10 +211,20 @@ def plotWaitingTime(patrons, fcfsWaitingTimes, sjfWaitingTimes, rrWaitingTimes):
     plt.plot(patrons, [np.mean(sjfWaitingTimes)]*len(patrons), label='Shortest-Job First')
     plt.plot(patrons, [np.mean(rrWaitingTimes)]*len(patrons), label='Round-Robin')
 
+    fcfsMean = np.mean(fcfsWaitingTimes)
+    xPosition = patrons[len(patrons) // 2]
+    plt.text(xPosition, fcfsMean - 90, str(round(fcfsMean, 2)), ha='center', va='top', fontsize=9, color='black')
+
+    sjfMean = np.mean(sjfWaitingTimes)
+    plt.text(xPosition, sjfMean + 0.02, str(round(sjfMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+
+    rrMean = np.mean(rrWaitingTimes)
+    plt.text(xPosition, rrMean + 0.02, str(round(rrMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+
     plt.xlabel('Processes')
     plt.ylabel('Mean Waiting Time (seconds)')
 
-    plt.title('Mean Waiting times of processes for different scheduling algorithms')
+    plt.title('Mean waiting times of processes/patrons for different scheduling algorithms', loc='center')
 
     plt.legend()
 
@@ -210,7 +240,7 @@ def plotResponseTime(patrons, fcfsResponseTimes, sjfResponseTimes, rrResponseTim
     plt.xlabel('Processes')
     plt.ylabel('Response Time (seconds)')
 
-    plt.title('Response times of processes for different scheduling algorithms')
+    plt.title('Response times of processes/patrons for different scheduling algorithms', loc='center')
 
     plt.legend()
 
@@ -222,10 +252,21 @@ def plotResponseTime(patrons, fcfsResponseTimes, sjfResponseTimes, rrResponseTim
     plt.plot(patrons, [np.mean(sjfResponseTimes)]*len(patrons), label='Shortest-Job First')
     plt.plot(patrons, [np.mean(rrResponseTimes)]*len(patrons), label='Round-Robin')
 
+    fcfsMean = np.mean(fcfsResponseTimes)
+    xPosition = patrons[len(patrons) // 2]
+    plt.text(xPosition, fcfsMean + 0.02, str(round(fcfsMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+
+    sjfMean = np.mean(sjfResponseTimes)
+    plt.text(xPosition, sjfMean + 0.02, str(round(sjfMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+
+    rrMean = np.mean(rrResponseTimes)
+    plt.text(xPosition, rrMean + 0.02, str(round(rrMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+
+
     plt.xlabel('Processes')
     plt.ylabel('Mean Response Time (seconds)')
 
-    plt.title('Mean Response times of processes for different scheduling algorithms')
+    plt.title('Mean Response times of processes for different scheduling algorithms',  loc='center')
 
     plt.legend()
 
@@ -241,11 +282,11 @@ def plotCPUUtilisation(fcfsCPUUtilisation, sjfCPUUtilisation, rrCPUUtilisation):
 
     # Add labels above each bar
     for i, height in enumerate(heights):
-        plt.text(i, height + 1, f'{height:.2f}%', ha='center', va='bottom')
+        plt.text(i, height + 0.2, f'{height:.2f}%', ha='center', va='bottom')
 
     plt.xlabel('Scheduling Algorithm')
     plt.ylabel('CPU Utilisation')
-    plt.title('CPU Utilisation for different scheduling algorithms')
+    plt.title('CPU Utilisation for different scheduling algorithms', loc='center')
 
     plt.savefig('CPUUtilisationPlot.jpeg', dpi=300)
     plt.clf()
@@ -339,9 +380,9 @@ def runTimeQuantumExperiment(numRepetitions):
     plt.scatter(quanta[minTurnaroundQuantum], minTurnaroundTime, color='red', s=20, zorder=5)
 
     plt.xlabel('Time Quantum')
-    plt.ylabel('Average Turnaround Time (seconds)')
+    plt.ylabel('Average turnaround itme (seconds)')
 
-    plt.title('Average Turnaround times for different time quanta')
+    plt.title('Average turnaround times for different time quanta')
 
     # plt.legend()
 
@@ -354,9 +395,9 @@ def runTimeQuantumExperiment(numRepetitions):
 
 
     plt.xlabel('Time Quantum')
-    plt.ylabel('Average Response Time (seconds)')
+    plt.ylabel('Average response time (seconds)')
 
-    plt.title('Average Response times for different time quanta')
+    plt.title('Average response times for different time quanta')
 
     # plt.legend()
 
