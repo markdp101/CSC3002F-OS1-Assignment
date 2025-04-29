@@ -123,6 +123,23 @@ def plotThroughput(fcfsThroughput, sjfThroughput, rrThroughput):
 
     plt.clf()
 
+    time_index = fcfsThroughput.index  # Assumes all series share the same index
+
+    plt.plot(time_index, [np.mean(fcfsThroughput)] * len(time_index), label='First-Come First-Serve')
+    plt.plot(time_index, [np.mean(sjfThroughput)] * len(time_index), label='Shortest-Job First')
+    plt.plot(time_index, [np.mean(rrThroughput)] * len(time_index), label='Round-Robin')
+
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Mean Throughput (Processes completed per second)')
+
+    plt.title('Mean Throughput for different CPU scheduling algorithms')
+
+    plt.legend()
+
+    plt.savefig("MeanThroughputPlot.jpeg", dpi=300)
+    
+    plt.clf()
+
 def plotTurnaroundTime(patrons, fcfsTurnaroundTimes, sjfTurnaroundTimes, rrTurnaroundTimes):
     plt.plot(patrons, fcfsTurnaroundTimes, label='First-Come First-Serve')
     plt.plot(patrons, sjfTurnaroundTimes, label='Shortest-Job First')
@@ -136,6 +153,21 @@ def plotTurnaroundTime(patrons, fcfsTurnaroundTimes, sjfTurnaroundTimes, rrTurna
     plt.legend()
 
     plt.savefig('TurnaroundPlot.jpeg', dpi=300)
+
+    plt.clf()
+
+    plt.plot(patrons, [np.mean(fcfsTurnaroundTimes)]*len(patrons), label='First-Come First-Serve')
+    plt.plot(patrons, [np.mean(sjfTurnaroundTimes)]*len(patrons), label='Shortest-Job First')
+    plt.plot(patrons, [np.mean(rrTurnaroundTimes)]*len(patrons), label='Round-Robin')
+
+    plt.xlabel('Processes')
+    plt.ylabel('Mean Turnaround Time (seconds)')
+
+    plt.title('Mean Turnaround times of processes for different scheduling algorithms')
+
+    plt.legend()
+
+    plt.savefig('MeanTurnaroundPlot.jpeg', dpi=300)
 
     plt.clf()
 
@@ -155,6 +187,21 @@ def plotWaitingTime(patrons, fcfsWaitingTimes, sjfWaitingTimes, rrWaitingTimes):
 
     plt.clf()
 
+    plt.plot(patrons, [np.mean(fcfsWaitingTimes)]*len(patrons), label='First-Come First-Serve')
+    plt.plot(patrons, [np.mean(sjfWaitingTimes)]*len(patrons), label='Shortest-Job First')
+    plt.plot(patrons, [np.mean(rrWaitingTimes)]*len(patrons), label='Round-Robin')
+
+    plt.xlabel('Processes')
+    plt.ylabel('Mean Waiting Time (seconds)')
+
+    plt.title('Mean Waiting times of processes for different scheduling algorithms')
+
+    plt.legend()
+
+    plt.savefig('MeanWaitingTimesPlot.jpeg', dpi=300)
+
+    plt.clf()
+
 def plotResponseTime(patrons, fcfsResponseTimes, sjfResponseTimes, rrResponseTimes):
     plt.plot(patrons, fcfsResponseTimes, label='First-Come First-Serve')
     plt.plot(patrons, sjfResponseTimes, label='Shortest-Job First')
@@ -171,21 +218,36 @@ def plotResponseTime(patrons, fcfsResponseTimes, sjfResponseTimes, rrResponseTim
 
     plt.clf()
 
+    plt.plot(patrons, [np.mean(fcfsResponseTimes)]*len(patrons), label='First-Come First-Serve')
+    plt.plot(patrons, [np.mean(sjfResponseTimes)]*len(patrons), label='Shortest-Job First')
+    plt.plot(patrons, [np.mean(rrResponseTimes)]*len(patrons), label='Round-Robin')
+
+    plt.xlabel('Processes')
+    plt.ylabel('Mean Response Time (seconds)')
+
+    plt.title('Mean Response times of processes for different scheduling algorithms')
+
+    plt.legend()
+
+    plt.savefig('MeanResponseTimesPlot.jpeg', dpi=300)
+
+    plt.clf()
+
 def plotCPUUtilisation(fcfsCPUUtilisation, sjfCPUUtilisation, rrCPUUtilisation):
-    x = ['First-Come First-Serve','Shortest-Job First','Round-Robin']
+    x = ['First-Come First-Serve', 'Shortest-Job First', 'Round-Robin']
     heights = [fcfsCPUUtilisation, sjfCPUUtilisation, rrCPUUtilisation]
 
     plt.bar(x, heights)
 
+    # Add labels above each bar
+    for i, height in enumerate(heights):
+        plt.text(i, height + 1, f'{height:.2f}%', ha='center', va='bottom')
+
     plt.xlabel('Scheduling Algorithm')
     plt.ylabel('CPU Utilisation')
-
     plt.title('CPU Utilisation for different scheduling algorithms')
 
-    # plt.legend()
-
     plt.savefig('CPUUtilisationPlot.jpeg', dpi=300)
-
     plt.clf()
 
 def getCMASeries(throughputs):
