@@ -17,7 +17,6 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 public class Barman extends Thread {
 	
-
 	private CountDownLatch startSignal;
 	private BlockingQueue<DrinkOrder> orderQueue;
 	int schedAlg =0;
@@ -27,6 +26,7 @@ public class Barman extends Thread {
 	// Used to keep track of the number of patrons/processes.
 	private int numPatrons;
 
+	// Drinks per patron is fixed to 5. (Assignment specs)
 	private int numDrinks = 5;
 
 	// Used to keep track of execution times for the drink orders per processes.
@@ -43,11 +43,7 @@ public class Barman extends Thread {
 	private long endTotalTime;
 
 	// Used to keep track of patron completion times.
-	private Long[] patronCompletionTimes;
-
-	// private long processingTime = 0;
-	// private long totalTime = 0;
-	
+	private Long[] patronCompletionTimes;	
 	
 	// Modified constructor to get number of total patrons for recording purposes.
 	Barman(  CountDownLatch startSignal,int sAlg,int numPatrons) {

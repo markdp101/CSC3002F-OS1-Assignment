@@ -32,14 +32,14 @@ public class Patron extends Thread {
 		this.startSignal=startSignal;
 		this.theBarman=aBarman;
 		this.numberOfDrinks=5; // number of drinks is fixed
-		// Array of response times for each CPU burst
+
+		// Array of response times for each CPU burst/ drink.
 		this.responseTimes = new Long [numberOfDrinks];
 		this.turnaroundTime = 0;
 		drinksOrder=new DrinkOrder[numberOfDrinks];
 		if (seed>0) random = new Random(seed);// for consistent Patron behaviour
 		else random = new Random();
 	}
-	
 	
 //this is what the threads do	
 	public void run() {
@@ -66,12 +66,6 @@ public class Patron extends Thread {
 				long startResponseTime = System.nanoTime();
 
 				theBarman.placeDrinkOrder(drinksOrder[i]);
-
-				// // Recording the starting time for calculating turnaround time and response time 
-				// // (start timing from when first drink order is placed).
-				// if (i == 0) {
-				// 	startTurnaroundTime = System.nanoTime();
-				// }
 
 				drinksOrder[i].waitForOrder();
 

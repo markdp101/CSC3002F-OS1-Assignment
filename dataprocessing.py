@@ -1,19 +1,17 @@
 # Author: Mark Du Preez - DPRMAR021
 # CSC3002F OS1 Process Scheduling Assignment 2025
-# Used to process raw output from simulation, extract relevant performant metrics and plot that.
+# Used to process raw output from simulation, extract relevant performance metrics and plot that.
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import sys
-import math
 
 def main ():
     if (len(sys.argv) == 2):
         runMainExperiment(int(sys.argv[1]))
     else:
         runTimeQuantumExperiment(int(sys.argv[1]))
-    # runTimeQuantumExperiment()
 
 def extractRawData(fileName):
     # Open simulation raw data file and extract data.
@@ -67,15 +65,11 @@ def extractRawData(fileName):
         drinkWaitingTimes = drinkResponseTimes - drinkExecutionTimes
         patronWaitingTimes = np.sum(drinkWaitingTimes, axis = 1)
 
-        # drinkExecutionTimes = np.sum(drinkExecutionTimes, axis=1)
-        # patronWaitingTimes = patronTurnaroundTimes - drinkExecutionTimes
-
         # Extracting patron completion times for throughput calculation.
         patronCompletionTimes = np.array(list(map(int, rawData.readline().split())))
 
         # Calculating throughput using sliding window.
-        # Average Burst Time = 
-        # Size of sliding window.
+        # Size of sliding window. Used to smooth throughput more.
         windowSize = 3000
 
         # Initialize a numpy array to hold throughput at different times (t) in program.
@@ -89,21 +83,6 @@ def extractRawData(fileName):
             throughputs[windowStart + (windowSize // 2)] = np.sum((patronCompletionTimes >= windowStart) & (patronCompletionTimes <= windowEnd))
             windowStart += 1
             windowEnd += 1
-
-        # # Compute mean, median and variance of patron waiting times.
-        # meanWaitingTime = np.mean(patronWaitingTimes)
-        # medianWaitingTime = np.median(patronWaitingTimes)
-        # varWaitingTime = np.var(patronWaitingTimes)
-
-        # # Compute mean, median and variance of patron response times.
-        # meanResponseTime = np.mean(patronResponseTimes)
-        # medianResponseTime = np.median(patronResponseTimes)
-        # varResponseTime = np.var(patronResponseTimes)
-
-        # # Compute mean, median and variance of patron turnaround times.
-        # meanTurnaroundTime = np.mean(patronTurnaroundTimes)
-        # medianTurnaroundTime = np.median(patronTurnaroundTimes)
-        # varTurnaroundTime = np.var(patronTurnaroundTimes)
 
         return patrons, cpuUtilisation, pd.Series(throughputs), patronTurnaroundTimes, patronWaitingTimes, patronResponseTimes
     
@@ -123,31 +102,33 @@ def plotThroughput(fcfsThroughput, sjfThroughput, rrThroughput):
 
     plt.clf()
 
-    timeIndex = fcfsThroughput.index  # Assumes all series share the same index
+    algorithms = ['First-Come First-Serve', 'Shortest-Job First', 'Round-Robin']
+    means = [np.mean(fcfsThroughput), np.mean(sjfThroughput), np.mean(rrThroughput)]
+    medians = [fcfsThroughput.median(), sjfThroughput.median(), rrThroughput.median()]
 
-    plt.plot(timeIndex, [np.mean(fcfsThroughput)] * len(timeIndex), label='First-Come First-Serve')
-    plt.plot(timeIndex, [np.mean(sjfThroughput)] * len(timeIndex), label='Shortest-Job First')
-    plt.plot(timeIndex, [np.mean(rrThroughput)] * len(timeIndex), label='Round-Robin')
+    x = np.arange(len(algorithms))
+    width = 0.35    
 
-    fcfsMean = np.mean(fcfsThroughput)
-    xPosition = timeIndex[len(timeIndex) // 2]
-    plt.text(xPosition, fcfsMean + 0.01, str(round(fcfsMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+    # Create bar plot
+    fig, ax = plt.subplots()
 
-    sjfMean = np.mean(sjfThroughput)
-    plt.text(xPosition, sjfMean + 0.01, str(round(sjfMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+    bars1 = ax.bar(x - width/2, means, width, label='Mean')
+    bars2 = ax.bar(x + width/2, medians, width, label='Median')
 
-    rrMean = np.mean(rrThroughput)
-    plt.text(xPosition, rrMean + 0.01, str(round(rrMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+    # Add labels above each bar
+    for i in range(len(x)):
+        ax.text(x[i] - width/2, means[i] + 0.2, f'{means[i]:.2f}', ha='center', va='bottom')
+        ax.text(x[i] + width/2, medians[i] + 0.2, f'{medians[i]:.2f}', ha='center', va='bottom')
 
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('Mean Throughput (Processes/Patrons completed per second)')
+    ax.set_xlabel('Scheduling Algorithm')
+    ax.set_ylabel('Throughput (Processes/Patrons completed per second)')
+    ax.set_title('Mean and Median Throughput for Scheduling Algorithms')
+    ax.set_xticks(x)
+    ax.set_xticklabels(algorithms, rotation=15)
+    ax.legend()
 
-    plt.title('Mean throughput for different CPU scheduling algorithms', loc='center')
-
-    plt.legend()
-
-    plt.savefig("MeanThroughputPlot.jpeg", dpi=300)
-    
+    plt.tight_layout()
+    plt.savefig('MeanMedianThroughputPlot.jpeg', dpi=300)
     plt.clf()
 
 def plotTurnaroundTime(patrons, fcfsTurnaroundTimes, sjfTurnaroundTimes, rrTurnaroundTimes):
@@ -166,29 +147,33 @@ def plotTurnaroundTime(patrons, fcfsTurnaroundTimes, sjfTurnaroundTimes, rrTurna
 
     plt.clf()
 
-    plt.plot(patrons, [np.mean(fcfsTurnaroundTimes)]*len(patrons), label='First-Come First-Serve')
-    plt.plot(patrons, [np.mean(sjfTurnaroundTimes)]*len(patrons), label='Shortest-Job First')
-    plt.plot(patrons, [np.mean(rrTurnaroundTimes)]*len(patrons), label='Round-Robin')
+    algorithms = ['First-Come First-Serve', 'Shortest-Job First', 'Round-Robin']
+    means = [np.mean(fcfsTurnaroundTimes), np.mean(sjfTurnaroundTimes), np.mean(rrTurnaroundTimes)]
+    medians = [np.median(fcfsTurnaroundTimes), np.median(sjfTurnaroundTimes), np.median(rrTurnaroundTimes)]
 
-    fcfsMean = np.mean(fcfsTurnaroundTimes)
-    xPosition = patrons[len(patrons) // 2]
-    plt.text(xPosition, fcfsMean - 90, str(round(fcfsMean, 2)), ha='center', va='top', fontsize=9, color='black')
+    x = np.arange(len(algorithms))
+    width = 0.35    
 
-    sjfMean = np.mean(sjfTurnaroundTimes)
-    plt.text(xPosition, sjfMean + 0.02, str(round(sjfMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+    # Create bar plot
+    fig, ax = plt.subplots()
 
-    rrMean = np.mean(rrTurnaroundTimes)
-    plt.text(xPosition, rrMean + 0.02, str(round(rrMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+    bars1 = ax.bar(x - width/2, means, width, label='Mean')
+    bars2 = ax.bar(x + width/2, medians, width, label='Median')
 
-    plt.xlabel('Processes')
-    plt.ylabel('Mean Turnaround Time (seconds)')
+    # Add labels above each bar
+    for i in range(len(x)):
+        ax.text(x[i] - width/2, means[i] + 0.2, f'{means[i]:.2f}', ha='center', va='bottom')
+        ax.text(x[i] + width/2, medians[i] + 0.2, f'{medians[i]:.2f}', ha='center', va='bottom')
 
-    plt.title('Mean turnaround times of processes/patrons for different scheduling algorithms', loc='center')
+    ax.set_xlabel('Scheduling Algorithm')
+    ax.set_ylabel('Turnaround Time (seconds)')
+    ax.set_title('Mean and Median Turnaround Times for Scheduling Algorithms')
+    ax.set_xticks(x)
+    ax.set_xticklabels(algorithms, rotation=15)
+    ax.legend()
 
-    plt.legend()
-
-    plt.savefig('MeanTurnaroundPlot.jpeg', dpi=300)
-
+    plt.tight_layout()
+    plt.savefig('MeanMedianTurnaroundTimesPlot.jpeg', dpi=300)
     plt.clf()
 
 def plotWaitingTime(patrons, fcfsWaitingTimes, sjfWaitingTimes, rrWaitingTimes):
@@ -200,36 +185,40 @@ def plotWaitingTime(patrons, fcfsWaitingTimes, sjfWaitingTimes, rrWaitingTimes):
     plt.ylabel('Waiting Time (seconds)')
 
     plt.title('Waiting times of processes/patrons for different scheduling algorithms', loc='center')
-
+    
     plt.legend()
 
     plt.savefig('WaitingTimesPlot.jpeg', dpi=300)
 
     plt.clf()
 
-    plt.plot(patrons, [np.mean(fcfsWaitingTimes)]*len(patrons), label='First-Come First-Serve')
-    plt.plot(patrons, [np.mean(sjfWaitingTimes)]*len(patrons), label='Shortest-Job First')
-    plt.plot(patrons, [np.mean(rrWaitingTimes)]*len(patrons), label='Round-Robin')
+    algorithms = ['First-Come First-Serve', 'Shortest-Job First', 'Round-Robin']
+    means = [np.mean(fcfsWaitingTimes), np.mean(sjfWaitingTimes), np.mean(rrWaitingTimes)]
+    medians = [np.median(fcfsWaitingTimes), np.median(sjfWaitingTimes), np.median(rrWaitingTimes)]
 
-    fcfsMean = np.mean(fcfsWaitingTimes)
-    xPosition = patrons[len(patrons) // 2]
-    plt.text(xPosition, fcfsMean - 90, str(round(fcfsMean, 2)), ha='center', va='top', fontsize=9, color='black')
+    x = np.arange(len(algorithms))
+    width = 0.35    
 
-    sjfMean = np.mean(sjfWaitingTimes)
-    plt.text(xPosition, sjfMean + 0.02, str(round(sjfMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+    # Create bar plot
+    fig, ax = plt.subplots()
 
-    rrMean = np.mean(rrWaitingTimes)
-    plt.text(xPosition, rrMean + 0.02, str(round(rrMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+    bars1 = ax.bar(x - width/2, means, width, label='Mean')
+    bars2 = ax.bar(x + width/2, medians, width, label='Median')
 
-    plt.xlabel('Processes')
-    plt.ylabel('Mean Waiting Time (seconds)')
+    # Add labels above each bar
+    for i in range(len(x)):
+        ax.text(x[i] - width/2, means[i] + 0.2, f'{means[i]:.2f}', ha='center', va='bottom')
+        ax.text(x[i] + width/2, medians[i] + 0.2, f'{medians[i]:.2f}', ha='center', va='bottom')
 
-    plt.title('Mean waiting times of processes/patrons for different scheduling algorithms', loc='center')
+    ax.set_xlabel('Scheduling Algorithm')
+    ax.set_ylabel('Waiting Time (seconds)')
+    ax.set_title('Mean and Median Waiting Times for Scheduling Algorithms')
+    ax.set_xticks(x)
+    ax.set_xticklabels(algorithms, rotation=15)
+    ax.legend()
 
-    plt.legend()
-
-    plt.savefig('MeanWaitingTimesPlot.jpeg', dpi=300)
-
+    plt.tight_layout()
+    plt.savefig('MeanMedianWaitingTimesPlot.jpeg', dpi=300)
     plt.clf()
 
 def plotResponseTime(patrons, fcfsResponseTimes, sjfResponseTimes, rrResponseTimes):
@@ -248,30 +237,33 @@ def plotResponseTime(patrons, fcfsResponseTimes, sjfResponseTimes, rrResponseTim
 
     plt.clf()
 
-    plt.plot(patrons, [np.mean(fcfsResponseTimes)]*len(patrons), label='First-Come First-Serve')
-    plt.plot(patrons, [np.mean(sjfResponseTimes)]*len(patrons), label='Shortest-Job First')
-    plt.plot(patrons, [np.mean(rrResponseTimes)]*len(patrons), label='Round-Robin')
+    algorithms = ['First-Come First-Serve', 'Shortest-Job First', 'Round-Robin']
+    means = [np.mean(fcfsResponseTimes), np.mean(sjfResponseTimes), np.mean(rrResponseTimes)]
+    medians = [np.median(fcfsResponseTimes), np.median(sjfResponseTimes), np.median(rrResponseTimes)]
 
-    fcfsMean = np.mean(fcfsResponseTimes)
-    xPosition = patrons[len(patrons) // 2]
-    plt.text(xPosition, fcfsMean + 0.02, str(round(fcfsMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+    x = np.arange(len(algorithms))
+    width = 0.35    
 
-    sjfMean = np.mean(sjfResponseTimes)
-    plt.text(xPosition, sjfMean + 0.02, str(round(sjfMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+    # Create bar plot
+    fig, ax = plt.subplots()
 
-    rrMean = np.mean(rrResponseTimes)
-    plt.text(xPosition, rrMean + 0.02, str(round(rrMean, 2)), ha='center', va='bottom', fontsize=9, color='black')
+    bars1 = ax.bar(x - width/2, means, width, label='Mean')
+    bars2 = ax.bar(x + width/2, medians, width, label='Median')
 
+    # Add labels above each bar
+    for i in range(len(x)):
+        ax.text(x[i] - width/2, means[i] + 0.2, f'{means[i]:.2f}', ha='center', va='bottom')
+        ax.text(x[i] + width/2, medians[i] + 0.2, f'{medians[i]:.2f}', ha='center', va='bottom')
 
-    plt.xlabel('Processes')
-    plt.ylabel('Mean Response Time (seconds)')
+    ax.set_xlabel('Scheduling Algorithm')
+    ax.set_ylabel('Response Time (seconds)')
+    ax.set_title('Mean and Median Response Times for Scheduling Algorithms')
+    ax.set_xticks(x)
+    ax.set_xticklabels(algorithms, rotation=15)
+    ax.legend()
 
-    plt.title('Mean Response times of processes for different scheduling algorithms',  loc='center')
-
-    plt.legend()
-
-    plt.savefig('MeanResponseTimesPlot.jpeg', dpi=300)
-
+    plt.tight_layout()
+    plt.savefig('MeanMedianResponseTimesPlot.jpeg', dpi=300)
     plt.clf()
 
 def plotCPUUtilisation(fcfsCPUUtilisation, sjfCPUUtilisation, rrCPUUtilisation):
@@ -376,6 +368,8 @@ def runTimeQuantumExperiment(numRepetitions):
     print("Best overall time quantum: " + str(minTimeQuantum))
     print(str(minTimeQuantum))
 
+    # Plotting average turnaround time for each quantum.
+
     plt.plot(quanta, averageTurnaroundTime)
     plt.scatter(quanta[minTurnaroundQuantum], minTurnaroundTime, color='red', s=20, zorder=5)
 
@@ -384,22 +378,19 @@ def runTimeQuantumExperiment(numRepetitions):
 
     plt.title('Average turnaround times for different time quanta')
 
-    # plt.legend()
-
     plt.savefig('TurnaroundTimeQuantumPlot.jpeg', dpi=300)
 
     plt.clf()
 
+    # Plotting average response time for each quantum.
+
     plt.plot(quanta, averageResponseTime)
     plt.scatter(quanta[minResponseQuantum], minResponseTime, color='red', s=20, zorder=5)
-
 
     plt.xlabel('Time Quantum')
     plt.ylabel('Average response time (seconds)')
 
     plt.title('Average response times for different time quanta')
-
-    # plt.legend()
 
     plt.savefig('ResponseTimeQuantumPlot.jpeg', dpi=300)
 
