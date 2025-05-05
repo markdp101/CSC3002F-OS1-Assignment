@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # CSC3002F OS1 Process Scheduling Assignment 2025
 
 # To install required python libaries if not already installed: matplotlib, numpy and pandas.
@@ -8,7 +10,7 @@
 
 # Clean all files.
 make clean
-rm -f *raw_data*.txt *Plot.jpeg
+rm -f scheduler*raw_data*.txt *Plot.jpeg
 
 # Compile program.
 make

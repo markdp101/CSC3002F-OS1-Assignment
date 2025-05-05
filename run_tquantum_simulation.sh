@@ -11,7 +11,7 @@
 
 # Clean all files.
 make clean
-rm -f *raw_data*.txt *Plot.jpeg
+rm -f quantum*raw_data*.txt *QuantumPlot.jpeg
 
 # Compile program.
 make
